@@ -1,7 +1,7 @@
 {
   "name": "i18n",
   "description": "lightweight translation module with dynamic json storage",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "homepage": "http://github.com/mashpie/i18n-node",
   "repository": {
     "type": "git",
@@ -18,6 +18,7 @@
     "lib": "."
   },
   "dependencies": {
+    "bluebird": "^3.5.0",
     "debug": "*",
     "make-plural": "^3.0.3",
     "math-interval-parser": "^1.1.0",

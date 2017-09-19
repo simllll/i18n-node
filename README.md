@@ -1,5 +1,12 @@
 # i18n
 
+# what's different in this fork
+- stripped express middleware
+- uses translate variable instead of files
+- does not add automatically untranslated strings, but calls a defined callback to deal with it (asynchronous)
+
+# description
+
 Lightweight simple translation module with dynamic json storage. Supports plain vanilla node.js apps and should work with any framework (like _express_, _restify_ and probably more) that exposes an `app.use()` method passing in `res` and `req` objects.
 Uses common __('...') syntax in app and templates.
 Stores language files in json files compatible to [webtranslateit](http://webtranslateit.com/) json format.
@@ -52,34 +59,6 @@ var greeting = i18n.__('Hello');
 
 
 > **Global** assumes you share a common state of localization in any time and any part of your app. This is usually fine in cli-style scripts. When serving responses to http requests you'll need to make sure that scope is __NOT__ shared globally but attached to your request object.
-
-## Example usage in express.js
-
-In an express app, you might use i18n.init to gather language settings of your visitors and also bind your helpers to response object honoring request objects locale, ie:
-
-```js
-// Configuration
-app.configure(function() {
-
-    [...]
-
-    // default: using 'accept-language' header to guess language settings
-    app.use(i18n.init);
-
-    [...]
-});
-```
-
-in your apps methods:
-
-```js
-app.get('/de', function(req, res){
-  var greeting = res.__('Hello');
-});
-```
-
-
-in your templates (depending on your template engine)
 
 ```ejs
 <%= __('Hello') %>
@@ -401,10 +380,10 @@ You might now add extra forms to certain json files to support the complete set 
 ```json
 {
   "%s cat": {
-    "one": "%d кошка",
-    "few": "%d кошки",
-    "many": "%d кошек",
-    "other": "%d кошка",
+    "one": "%d ??????????",
+    "few": "%d ??????????",
+    "many": "%d ??????????",
+    "other": "%d ??????????",
   }
 }
 ```
@@ -412,12 +391,12 @@ You might now add extra forms to certain json files to support the complete set 
 and let `__n()` select the correct form for you:
 
 ```js
-__n('%s cat', 0); // --> 0 кошек
-__n('%s cat', 1); // --> 1 кошка
-__n('%s cat', 2); // --> 2 кошки
-__n('%s cat', 5); // --> 5 кошек
-__n('%s cat', 6); // --> 6 кошек
-__n('%s cat', 21); // --> 21 кошка
+__n('%s cat', 0); // --> 0 ??????????
+__n('%s cat', 1); // --> 1 ??????????
+__n('%s cat', 2); // --> 2 ??????????
+__n('%s cat', 5); // --> 5 ??????????
+__n('%s cat', 6); // --> 6 ??????????
+__n('%s cat', 21); // --> 21 ??????????
 ```
 
 > __Note__ i18n.__n() will add a blueprint ("one, other" or "one, few, other" for eaxmple) for each locale to your json on updateFiles in a future version.
@@ -446,31 +425,31 @@ res.__mf('{N, plural, one{# cat} few{# cats} many{# cats} others{# cats}}', {N: 
 // en --> 1 cat
 // de --> 1 Katze
 // fr --> 1 chat
-// ru --> 1 кошка       ru uses "__one__" when ending on "1"
+// ru --> 1 ??????????       ru uses "__one__" when ending on "1"
 
 // results for "0" in   (most use "others")
 // en --> 0 cats
 // de --> 0 Katzen
 // fr --> 0 chat        fr uses "__one__" for zero
-// ru --> 0 кошек       ru uses "__many__"
+// ru --> 0 ??????????       ru uses "__many__"
 
 // results for "2" in   (most use "others")
 // en --> 2 cat
 // de --> 2 Katze
 // fr --> 2 chat
-// ru --> 2 кошки       ru uses "__few__" when ending on "1"
+// ru --> 2 ??????????       ru uses "__few__" when ending on "1"
 
 // results for "5" in   (most use "others")
 // en --> 5 cat
 // de --> 5 Katze
 // fr --> 5 chat
-// ru --> 5 кошек       ru uses "__many__"
+// ru --> 5 ??????????       ru uses "__many__"
 
 // results for "21" in  (most use "others")
 // en --> 21 cat
 // de --> 21 Katze
 // fr --> 21 chat
-// ru --> 21 кошка       ru uses "__one__" when ending on "1"
+// ru --> 21 ??????????       ru uses "__one__" when ending on "1"
 ```
 
 Take a look at [Mozilla](https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_and_Plurals) to quickly get an idea of what pluralization has to deal with. With `__mf()` you get a very powerfull tool, but you need to handle it correctly.
@@ -527,21 +506,21 @@ req.setLocale('de');
 Use setLocale to change any initial locale that was set in `i18n.init()`. You get more control on how when and which objects get setup with a given locale. Locale values are inherited within the given schema like in `i18n.init()` Let's see some examples:
 
 ```js
-i18n.setLocale(req, 'ar'); // --> req: مرحبا res: مرحبا res.locals: مرحبا
-i18n.setLocale(res, 'ar'); // --> req: Hallo res: مرحبا res.locals: مرحبا
-i18n.setLocale(res.locals, 'ar'); // --> req: Hallo res: Hallo res.locals: مرحبا
+i18n.setLocale(req, 'ar'); // --> req: ?????????? res: ?????????? res.locals: ??????????
+i18n.setLocale(res, 'ar'); // --> req: Hallo res: ?????????? res.locals: ??????????
+i18n.setLocale(res.locals, 'ar'); // --> req: Hallo res: Hallo res.locals: ??????????
 ```
 
 You'll get even more controll when passing an array of objects:
 
 ```js
-i18n.setLocale([req, res.locals], req.params.lang); // --> req: مرحبا res: Hallo res.locals: مرحبا
+i18n.setLocale([req, res.locals], req.params.lang); // --> req: ?????????? res: Hallo res.locals: ??????????
 ```
 
 or disable inheritance by passing true as third parameter:
 
 ```js
-i18n.setLocale(res, 'ar', true); // --> req: Hallo res: مرحبا res.locals: Hallo
+i18n.setLocale(res, 'ar', true); // --> req: Hallo res: ?????????? res.locals: Hallo
 ```
 
 ### i18n.getLocale()
@@ -890,7 +869,7 @@ that file can be edited or just uploaded to [webtranslateit](http://docs.webtran
     "weekend": "Wochenende",
     "Hello %s, how are you today? How was your %s.": "Hallo %s, wie geht es dir heute? Wie war dein %s.",
     "Hi": "Hi",
-    "Howdy": "Hallöchen",
+    "Howdy": "Hall??chen",
     "%s cat": {
         "one": "%s Katze",
         "other": "%s Katzen"
