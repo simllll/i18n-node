@@ -148,7 +148,7 @@ module.exports = (function() {
     // called like __({phrase: "Hello", locale: "en"})
     if (typeof phrase === 'object') {
       if (typeof phrase.locale === 'string' && typeof phrase.phrase === 'string') {
-        msg = translate(phrase.locale, phrase.phrase, false, phrase.mustExist);
+        msg = translate(phrase.locale, phrase.phrase, false, phrase.mustExist, phrase.isTranslateableString);
       }
     }
     // called like __("Hello")
@@ -618,7 +618,7 @@ module.exports = (function() {
   /**
    * read locale file, translate a msg and write to fs if new
    */
-  var translate = function(locale, singular, plural, mustExist) {
+  var translate = function(locale, singular, plural, mustExist, isTranslateableString) {
     if (locale === undefined) {
       logWarn('WARN: No locale found - check the context of the call to __(). Using ' +
         defaultLocale + ' as current locale');
@@ -690,7 +690,7 @@ module.exports = (function() {
       mutator(defaultSingular || singular);
       logDebugFn("missing", defaultSingular || singular, defaultPlural || plural);
       if(typeof missingCB === 'function') {
-          missingCB(locale, defaultSingular || singular, defaultPlural || plural, 2);
+          missingCB(locale, defaultSingular || singular, defaultPlural || plural, isTranslateableString);
       }
     }
 
